@@ -11,7 +11,7 @@ class App extends StatelessWidget {
       title: 'Kalender',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // Menggunakan tema sesuai pengaturan sistem
+      themeMode: ThemeMode.system,
       home: AppRouter.initialRoute,
     );
   }
