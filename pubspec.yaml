@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  table_calendar: ^3.0.0
+  sqflite: ^2.0.2+1 
+  path: ^1.8.1
+  intl: ^0.18.0  
 
 dev_dependencies:
   flutter_test:

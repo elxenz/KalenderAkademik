@@ -8,7 +8,10 @@ plugins {
 android {
     namespace = "com.example.kalender"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    
+    // --- TAMBAHKAN BARIS INI ---
+    ndkVersion = "27.0.12077973"
+    // -------------------------
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
