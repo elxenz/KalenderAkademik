@@ -1,21 +1,19 @@
+import 'package:kalender/features/calendar/data/datasources/event_local_datasource.dart';
+import 'package:kalender/features/calendar/data/models/event_model.dart'
+    as model;
 import 'package:kalender/features/calendar/domain/entities/event.dart';
 import 'package:kalender/features/calendar/domain/repositories/event_repository.dart';
-import 'package:kalender/features/calendar/data/datasources/event_local_datasource.dart';
-import 'package:kalender/features/calendar/data/models/event_model.dart';
 
 class EventRepositoryImpl implements EventRepository {
+  // Pastikan EventLocalDataSource adalah tipe yang dikenal
   final EventLocalDataSource localDataSource;
 
   EventRepositoryImpl({required this.localDataSource});
 
   @override
   Future<int> addEvent(Event event) async {
-    final eventModel = EventModel(
-      title: event.title, description: event.description, date: event.date,
-      startTime: event.startTime, endTime: event.endTime, colorValue: event.colorValue,
-      isRecurring: event.isRecurring, recurrenceRule: event.recurrenceRule,
-    );
-    return await localDataSource.insertEvent(eventModel);
+    final eventModel = model.EventModel.fromEntity(event);
+    return await localDataSource.addEvent(eventModel);
   }
 
   @override
@@ -25,21 +23,37 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<List<Event>> getAllEvents() async {
-    return await localDataSource.getAllEvents();
+    final eventModels = await localDataSource.getEvents();
+    return eventModels.map((model) => model.toEntity()).toList();
+  }
+
+  @override
+  Future<List<Event>> getEventsForMonth(DateTime month) async {
+    final eventModels = await localDataSource.getEventsForMonth(month);
+    return eventModels.map((model) => model.toEntity()).toList();
   }
 
   @override
   Future<List<Event>> searchEvents(String query) async {
-    return await localDataSource.searchEvents(query);
+    final eventModels = await localDataSource.searchEvents(query);
+    return eventModels.map((model) => model.toEntity()).toList();
   }
 
   @override
   Future<void> updateEvent(Event event) async {
-    final eventModel = EventModel(
-      id: event.id, title: event.title, description: event.description, date: event.date,
-      startTime: event.startTime, endTime: event.endTime, colorValue: event.colorValue,
-      isRecurring: event.isRecurring, recurrenceRule: event.recurrenceRule,
-    );
+    final eventModel = model.EventModel.fromEntity(event);
     await localDataSource.updateEvent(eventModel);
   }
 }
+
+// Catatan: Pastikan EventModel Anda memiliki method fromEntity dan toEntity
+// contoh di lib/features/calendar/data/models/event_model.dart
+/*
+  factory EventModel.fromEntity(Event event) {
+    return EventModel(id: event.id, ...);
+  }
+
+  Event toEntity() {
+    return Event(id: id, ...);
+  }
+*/

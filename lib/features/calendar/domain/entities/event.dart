@@ -1,29 +1,47 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-enum RecurrenceRule { none, daily, weekly, monthly }
-
-class Event {
+class Event extends Equatable {
   final int? id;
   final String title;
   final String description;
   final DateTime date;
-  final String startTime;
-  final String endTime;
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
   final int colorValue;
-  final bool isRecurring;
-  final RecurrenceRule recurrenceRule;
 
-  Event({
+  const Event({
     this.id,
     required this.title,
     this.description = '',
     required this.date,
     required this.startTime,
     required this.endTime,
-    this.colorValue = 0xFF4285F4,
-    this.isRecurring = false,
-    this.recurrenceRule = RecurrenceRule.none,
+    this.colorValue = 0xFF2196F3, // Warna biru sebagai default
   });
 
-  Color get color => Color(colorValue);
+  @override
+  List<Object?> get props =>
+      [id, title, description, date, startTime, endTime, colorValue];
+
+  // Helper untuk membuat salinan event dengan beberapa nilai yang diubah
+  Event copyWith({
+    int? id,
+    String? title,
+    String? description,
+    DateTime? date,
+    TimeOfDay? startTime,
+    TimeOfDay? endTime,
+    int? colorValue,
+  }) {
+    return Event(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      date: date ?? this.date,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      colorValue: colorValue ?? this.colorValue,
+    );
+  }
 }

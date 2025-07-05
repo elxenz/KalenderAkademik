@@ -1,53 +1,65 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:kalender/features/calendar/domain/entities/event.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationHelper {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final NotificationHelper _instance = NotificationHelper._internal();
+  factory NotificationHelper() => _instance;
 
-  Future<void> initialize() async {
+  NotificationHelper._internal();
+
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  Future<void> init() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
     tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('Asia/Makassar'));
-
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true, requestBadgePermission: true, requestSoundPermission: true,
-    );
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid, iOS: initializationSettingsIOS,
-    );
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<bool> _requestExactAlarmPermission() async {
-    if (await Permission.scheduleExactAlarm.isGranted) return true;
-    final status = await Permission.scheduleExactAlarm.request();
-    return status.isGranted;
-  }
+  Future<void> scheduleNotification(Event event, int reminderMinutes) async {
+    if (event.id == null) return;
 
-  Future<void> scheduleNotification({ required int id, required String title, required String body, required DateTime scheduledTime }) async {
-    final hasPermission = await _requestExactAlarmPermission();
-    if (!hasPermission) return;
-    if (scheduledTime.isBefore(DateTime.now())) return;
+    final scheduleTime = DateTime(
+      event.date.year,
+      event.date.month,
+      event.date.day,
+      event.startTime.hour,
+      event.startTime.minute,
+    ).subtract(Duration(minutes: reminderMinutes));
 
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      id, title, body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
+    // Jangan jadwalkan notifikasi untuk waktu yang sudah lewat
+    if (scheduleTime.isBefore(DateTime.now())) {
+      return;
+    }
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      event.id!,
+      event.title,
+      'Acara akan dimulai sebentar lagi.',
+      tz.TZDateTime.from(scheduleTime, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(
-          'event_channel_id', 'Event Notifications',
-          channelDescription: 'Channel untuk pengingat acara.',
-          importance: Importance.max, priority: Priority.high,
+          'event_channel',
+          'Event Reminders',
+          channelDescription: 'Channel untuk notifikasi pengingat acara',
+          importance: Importance.max,
+          priority: Priority.high,
         ),
-        iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
   Future<void> cancelNotification(int id) async {
-    await flutterLocalNotificationsPlugin.cancel(id);
+    await _flutterLocalNotificationsPlugin.cancel(id);
   }
 }

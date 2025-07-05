@@ -38,10 +38,8 @@ class EventModel extends Event {
       'title': title,
       'description': description,
       'date': date.toIso8601String(),
-      'startTime':
-          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
-      'endTime':
-          '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
+      'startTime': '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}',
+      'endTime': '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}',
       'colorValue': colorValue,
     };
   }
