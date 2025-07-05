@@ -9,18 +9,13 @@ class EventRepositoryImpl implements EventRepository {
   EventRepositoryImpl({required this.localDataSource});
 
   @override
-  Future<void> addEvent(Event event) async {
+  Future<int> addEvent(Event event) async {
     final eventModel = EventModel(
-      title: event.title,
-      description: event.description,
-      date: event.date,
-      startTime: event.startTime,
-      endTime: event.endTime,
-      colorValue: event.colorValue,
-      isRecurring: event.isRecurring,
-      recurrenceRule: event.recurrenceRule,
+      title: event.title, description: event.description, date: event.date,
+      startTime: event.startTime, endTime: event.endTime, colorValue: event.colorValue,
+      isRecurring: event.isRecurring, recurrenceRule: event.recurrenceRule,
     );
-    await localDataSource.insertEvent(eventModel);
+    return await localDataSource.insertEvent(eventModel);
   }
 
   @override
@@ -30,28 +25,20 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<List<Event>> getAllEvents() async {
-    final eventModels = await localDataSource.getAllEvents();
-    return eventModels.map((model) => model as Event).toList();
+    return await localDataSource.getAllEvents();
   }
 
   @override
   Future<List<Event>> searchEvents(String query) async {
-    final eventModels = await localDataSource.searchEvents(query);
-    return eventModels.map((model) => model as Event).toList();
+    return await localDataSource.searchEvents(query);
   }
 
   @override
   Future<void> updateEvent(Event event) async {
     final eventModel = EventModel(
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      date: event.date,
-      startTime: event.startTime,
-      endTime: event.endTime,
-      colorValue: event.colorValue,
-      isRecurring: event.isRecurring,
-      recurrenceRule: event.recurrenceRule,
+      id: event.id, title: event.title, description: event.description, date: event.date,
+      startTime: event.startTime, endTime: event.endTime, colorValue: event.colorValue,
+      isRecurring: event.isRecurring, recurrenceRule: event.recurrenceRule,
     );
     await localDataSource.updateEvent(eventModel);
   }

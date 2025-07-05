@@ -22,10 +22,7 @@ class EventLocalDataSourceImpl implements EventLocalDataSource {
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'calendar.db');
     return await openDatabase(
-      path,
-      version: 4,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
+      path, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade,
     );
   }
 
@@ -33,43 +30,22 @@ class EventLocalDataSourceImpl implements EventLocalDataSource {
     await db.execute('''
       CREATE TABLE events (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        date TEXT NOT NULL,
-        startTime TEXT NOT NULL,
-        endTime TEXT NOT NULL,
-        description TEXT,
-        colorValue INTEGER,
-        isRecurring INTEGER,
-        recurrenceRule TEXT
+        title TEXT NOT NULL, date TEXT NOT NULL, startTime TEXT NOT NULL, endTime TEXT NOT NULL,
+        description TEXT, colorValue INTEGER, isRecurring INTEGER, recurrenceRule TEXT
       )
     ''');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute(
-          "ALTER TABLE events ADD COLUMN startTime TEXT NOT NULL DEFAULT '00:00'");
-      await db.execute(
-          "ALTER TABLE events ADD COLUMN endTime TEXT NOT NULL DEFAULT '00:00'");
-    }
-    if (oldVersion < 3) {
-      await db.execute("ALTER TABLE events ADD COLUMN description TEXT");
-      await db.execute(
-          "ALTER TABLE events ADD COLUMN colorValue INTEGER NOT NULL DEFAULT 4282557951");
-    }
-    if (oldVersion < 4) {
-      await db.execute(
-          "ALTER TABLE events ADD COLUMN isRecurring INTEGER NOT NULL DEFAULT 0");
-      await db.execute(
-          "ALTER TABLE events ADD COLUMN recurrenceRule TEXT NOT NULL DEFAULT 'none'");
-    }
+    if (oldVersion < 2) { await db.execute("ALTER TABLE events ADD COLUMN startTime TEXT NOT NULL DEFAULT '00:00'"); await db.execute("ALTER TABLE events ADD COLUMN endTime TEXT NOT NULL DEFAULT '00:00'"); }
+    if (oldVersion < 3) { await db.execute("ALTER TABLE events ADD COLUMN description TEXT"); await db.execute("ALTER TABLE events ADD COLUMN colorValue INTEGER NOT NULL DEFAULT 4282557951"); }
+    if (oldVersion < 4) { await db.execute("ALTER TABLE events ADD COLUMN isRecurring INTEGER NOT NULL DEFAULT 0"); await db.execute("ALTER TABLE events ADD COLUMN recurrenceRule TEXT NOT NULL DEFAULT 'none'"); }
   }
 
   @override
   Future<int> insertEvent(EventModel event) async {
     final db = await database;
-    return await db.insert('events', event.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert('events', event.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   @override
@@ -82,8 +58,7 @@ class EventLocalDataSourceImpl implements EventLocalDataSource {
   @override
   Future<void> updateEvent(EventModel event) async {
     final db = await database;
-    await db.update('events', event.toMap(),
-        where: 'id = ?', whereArgs: [event.id]);
+    await db.update('events', event.toMap(), where: 'id = ?', whereArgs: [event.id]);
   }
 
   @override
@@ -96,8 +71,7 @@ class EventLocalDataSourceImpl implements EventLocalDataSource {
   Future<List<EventModel>> searchEvents(String query) async {
     final db = await database;
     if (query.isEmpty) return [];
-    final maps = await db.query('events',
-        where: 'title LIKE ?', whereArgs: ['%$query%'], orderBy: 'date DESC');
+    final maps = await db.query('events', where: 'title LIKE ?', whereArgs: ['%$query%'], orderBy: 'date DESC');
     return List.generate(maps.length, (i) => EventModel.fromMap(maps[i]));
   }
 }
