@@ -1,13 +1,12 @@
-// lib/features/calendar/presentation/widgets/event_search_delegate.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-// --- PERBAIKAN IMPORT ---
 import 'package:kalender/features/calendar/domain/entities/event.dart';
-import 'package:kalender/core/utils/database_helper.dart';
-// ------------------------
+import 'package:kalender/features/calendar/domain/repositories/event_repository.dart';
 
 class EventSearchDelegate extends SearchDelegate<Event?> {
-  final DatabaseHelper dbHelper = DatabaseHelper();
+  final EventRepository eventRepository;
+
+  EventSearchDelegate({required this.eventRepository});
 
   @override
   String get searchFieldLabel => 'Cari acara...';
@@ -38,12 +37,11 @@ class EventSearchDelegate extends SearchDelegate<Event?> {
   @override
   Widget buildResults(BuildContext context) {
     return FutureBuilder<List<Event>>(
-      future: dbHelper.searchEvents(query),
+      future: eventRepository.searchEvents(query),
       builder: (context, snapshot) {
         if (query.isEmpty) {
           return const Center(
-            child: Text('Silakan ketik untuk mencari acara.'),
-          );
+              child: Text('Silakan ketik untuk mencari acara.'));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -74,7 +72,6 @@ class EventSearchDelegate extends SearchDelegate<Event?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    // Untuk simple, kita tampilkan hasil langsung saat mengetik
     return buildResults(context);
   }
 }

@@ -15,6 +15,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   late TimeOfDay _startTime;
   late TimeOfDay _endTime;
   late Color _selectedColor;
+  bool _isRecurring = false;
+  RecurrenceRule _recurrenceRule = RecurrenceRule.daily;
 
   final List<Color> _colorPalette = [
     Colors.blue.shade700,
@@ -38,6 +40,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
       _endTime = TimeOfDay(
           hour: int.parse(widget.event!.endTime.split(':')[0]),
           minute: int.parse(widget.event!.endTime.split(':')[1]));
+      _isRecurring = widget.event!.isRecurring;
+      _recurrenceRule = widget.event!.recurrenceRule;
     } else {
       _selectedColor = _colorPalette.first;
       _startTime = TimeOfDay.now();
@@ -53,22 +57,6 @@ class _EditEventScreenState extends State<EditEventScreen> {
     super.dispose();
   }
 
-  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isStartTime ? _startTime : _endTime,
-    );
-    if (picked != null && picked != (isStartTime ? _startTime : _endTime)) {
-      setState(() {
-        if (isStartTime) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
-    }
-  }
-
   void _submitData() {
     final enteredTitle = _titleController.text;
     if (enteredTitle.isEmpty) return;
@@ -80,10 +68,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
           '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}',
       'endTime':
           '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}',
-      // --- PERBAIKAN DI SINI ---
-      // ignore: deprecated_member_use_from_same_package, deprecated_member_use
-      'colorValue': _selectedColor.value.toString(),
-      // --------------------------
+      // ignore: deprecated_member_use_from_same_package
+      'colorValue': _selectedColor.value,
+      'isRecurring': _isRecurring,
+      'recurrenceRule': _isRecurring ? _recurrenceRule : RecurrenceRule.none,
     };
     Navigator.of(context).pop(result);
   }
@@ -92,8 +80,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.event == null ? 'Tambah Acara' : 'Edit Acara'),
-      ),
+          title: Text(widget.event == null ? 'Tambah Acara' : 'Edit Acara')),
+      backgroundColor: _selectedColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -110,6 +98,34 @@ class _EditEventScreenState extends State<EditEventScreen> {
               controller: _descController,
               maxLines: 3,
             ),
+            const SizedBox(height: 20),
+            SwitchListTile(
+              title: const Text('Acara Berulang'),
+              value: _isRecurring,
+              onChanged: (bool value) {
+                setState(() {
+                  _isRecurring = value;
+                });
+              },
+            ),
+            if (_isRecurring)
+              DropdownButtonFormField<RecurrenceRule>(
+                value: _recurrenceRule,
+                decoration: const InputDecoration(labelText: 'Ulangi setiap'),
+                items: const [
+                  DropdownMenuItem(
+                      value: RecurrenceRule.daily, child: Text('Hari')),
+                  DropdownMenuItem(
+                      value: RecurrenceRule.weekly, child: Text('Minggu')),
+                  DropdownMenuItem(
+                      value: RecurrenceRule.monthly, child: Text('Bulan')),
+                ],
+                onChanged: (RecurrenceRule? newValue) {
+                  setState(() {
+                    _recurrenceRule = newValue!;
+                  });
+                },
+              ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -172,5 +188,21 @@ class _EditEventScreenState extends State<EditEventScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: isStartTime ? _startTime : _endTime,
+    );
+    if (picked != null && picked != (isStartTime ? _startTime : _endTime)) {
+      setState(() {
+        if (isStartTime) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
   }
 }

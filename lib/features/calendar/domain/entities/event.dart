@@ -1,41 +1,32 @@
 import 'package:flutter/material.dart';
 
+// Enum untuk aturan perulangan tetap di sini karena ini adalah bagian dari logika domain
+enum RecurrenceRule { none, daily, weekly, monthly }
+
 class Event {
   final int? id;
   final String title;
-  final String description; // Tambahan baru
+  final String description;
   final DateTime date;
   final String startTime;
   final String endTime;
-  final int colorValue; // Tambahan baru untuk menyimpan nilai warna
+  final int colorValue;
+  final bool isRecurring;
+  final RecurrenceRule recurrenceRule;
 
   Event({
     this.id,
     required this.title,
-    this.description = '', // Nilai default
+    this.description = '',
     required this.date,
     required this.startTime,
     required this.endTime,
-    this.colorValue = 0xFF4285F4, // Warna biru Google sebagai default
+    this.colorValue = 0xFF4285F4,
+    this.isRecurring = false,
+    this.recurrenceRule = RecurrenceRule.none,
   });
 
-  // Helper untuk mendapatkan objek Color
   Color get color => Color(colorValue);
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'date': date.toIso8601String().split('T').first,
-      'startTime': startTime,
-      'endTime': endTime,
-      'colorValue': colorValue,
-    };
-  }
-
-  @override
-  String toString() {
-    return title;
-  }
+  // Kita akan memindahkan logika toMap dan fromMap ke lapisan Data
 }
